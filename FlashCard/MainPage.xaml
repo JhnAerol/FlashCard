@@ -6,7 +6,7 @@
     <!-- MainPage.xaml -->
     <VerticalStackLayout Padding="20" Spacing="15">
 
-        <Label Text="Shuffle Numbers (1 - 10)"
+        <Label Text="Shuffle Numbers (1 - 3)"
            FontSize="24"
            HorizontalOptions="Center" />
 
