@@ -101,7 +101,7 @@
         {
             //Display alert when answer is Incorrect
             await DisplayAlert(
-                "Incorrect", $"Sorry! Wromg amswer :(. Try again!", "Try Again"
+                "Incorrect", $"Sorry! Wrong amswer :(. Try again!", "Try Again"
             );
 
             ClearAnswerField();
