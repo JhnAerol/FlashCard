@@ -31,14 +31,14 @@
         //Navigate Next Item
         private void OnNextClicked(object sender, EventArgs e)
         {
-            NumberCarousel.Position = (NumberCarousel.Position == TotalPokemon - 1 ? NumberCarousel.Position = 0 : NumberCarousel.Position++);
+            NumberCarousel.Position = (NumberCarousel.Position == TotalPokemon - 1 ? 0 : NumberCarousel.Position++);
             ClearAnswerField();
         }
 
         //Navigate Prev Item
         private void OnPrevClicked(object sender, EventArgs e)
         {
-            NumberCarousel.Position = NumberCarousel.Position == 0 ? TotalPokemon - 1 : NumberCarousel.Position--;
+            NumberCarousel.Position = (NumberCarousel.Position == 0 ? TotalPokemon - 1 : NumberCarousel.Position--);
             ClearAnswerField();
         }
 
@@ -93,9 +93,8 @@
                 }
             }
 
+            //Count 1.2s
             Thread.Sleep(1200);
-
-            
 
             //Check if all the images are revealed
             bool allRevealed = Pokedex.pokedex.Values.All(p => p.ImageFile != null && !p.ImageFile.Contains("_black"));
@@ -115,7 +114,7 @@
                 await DisplayAlert("Correct!", $"That's right! It's {pokemonName}! ", "Next Pokémon");
             }
 
-            //Go to next pokemon
+            //Go to perspective pokemon
             if (NumberCarousel.Position <= TotalPokemon - 1)
             {
                 if(NumberCarousel.Position == TotalPokemon - 1 || allRevealed)
