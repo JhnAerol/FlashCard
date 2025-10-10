@@ -106,7 +106,8 @@
                                             <Border.StrokeShape>
                                                 <RoundRectangle CornerRadius="15" />
                                             </Border.StrokeShape>
-                                            <Image Source="{Binding Value.ImageFile}"
+                                            <Image x:Name="pokemonImg"
+                                                   Source="{Binding Value.ImageFile}"
                                                    WidthRequest="200" 
                                                    HeightRequest="200"
                                                    Aspect="AspectFit"
@@ -146,7 +147,7 @@
                                BackgroundColor="#F8F8F8"
                                HeightRequest="50" />
 
-                        <Button Text="✓ SUBMIT ANSWER"
+                        <Button Text="SUBMIT ANSWER"
                                 Clicked="OnEnterClicked"
                                 FontSize="18"
                                 FontAttributes="Bold"

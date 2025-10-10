@@ -75,15 +75,50 @@
         //Method to call if the answer is Correct
         private async Task ShowCorrectAnswer(string pokemonName)
         {
-            //Display alert when answer is Correct
-            await DisplayAlert(
-                "Correct!", $"That's right! It's {pokemonName}! ", "Next Pokémon"
-            );
+            //Update the image to colored version
+            if (Pokedex.pokedex.ContainsKey(pokemonName))
+            {
+                Pokedex.pokedex[pokemonName].ImageFile = $"{pokemonName}.png";
+            }
+
+            //FadeIn Effect
+            if (NumberCarousel.CurrentItem is KeyValuePair<string, ImageClass>)
+            {
+                var currentView = NumberCarousel.VisibleViews.FirstOrDefault();
+                var image = currentView?.FindByName<Image>("pokemonImg");
+                if (image != null)
+                {
+                    await image.FadeTo(0, 100);
+                    await image.FadeTo(1, 300);
+                }
+            }
+
+            Thread.Sleep(1200);
+
+            
+
+            //Check if all the images are revealed
+            bool allRevealed = Pokedex.pokedex.Values.All(p => p.ImageFile != null && !p.ImageFile.Contains("_black"));
+            if (allRevealed)
+            {
+                //Display alert when all the images are revealed
+                await DisplayAlert("Congratulations!", "All Pokémon have been revealed!", "Okay");
+            }
+            else if (NumberCarousel.Position == TotalPokemon - 1)
+            {
+                //Display alert when answer is corrent and it is the last number
+                await DisplayAlert("Correct!", $"That's right! It's {pokemonName}! ", "Okay");
+            }
+            else
+            {
+                //Display alert when answer is corrent
+                await DisplayAlert("Correct!", $"That's right! It's {pokemonName}! ", "Next Pokémon");
+            }
 
             //Go to next pokemon
             if (NumberCarousel.Position <= TotalPokemon - 1)
             {
-                if(NumberCarousel.Position == TotalPokemon - 1)
+                if(NumberCarousel.Position == TotalPokemon - 1 || allRevealed)
                 {
                     NumberCarousel.Position = 0;
                 }
@@ -100,9 +135,7 @@
         private async Task ShowIncorrectAnswer(string correctAnswer)
         {
             //Display alert when answer is Incorrect
-            await DisplayAlert(
-                "Incorrect", $"Sorry! Wrong amswer :(. Try again!", "Try Again"
-            );
+            await DisplayAlert("Incorrect", $"Sorry! Wrong amswer :(. Try again!", "Try Again");
 
             ClearAnswerField();
             txtAnswer.Focus();
