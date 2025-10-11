@@ -1,5 +1,4 @@
 ﻿using System.Collections.Frozen;
-using static Android.Renderscripts.ScriptGroup;
 
 namespace FlashCard
 {
@@ -15,7 +14,6 @@ namespace FlashCard
         {
             InitializeComponent();
             InitializePokedex();
-
         }
 
         //To Display Pokedex
@@ -37,10 +35,9 @@ namespace FlashCard
         //Navigate Next Item
         private void OnNextClicked(object sender, EventArgs e)
         {
-
             NumberCarousel.Position = (NumberCarousel.Position == TotalPokemon - 1 ? 0 : NumberCarousel.Position++);
-            ClearAnswerField(); 
-            ShowPokemonAtIndex(NumberCarousel.Position + 1);
+            ClearAnswerField();
+            ShowPokemonAtIndex(NumberCarousel.Position);
         }
 
         //Navigate Prev Item
@@ -48,14 +45,7 @@ namespace FlashCard
         {
             NumberCarousel.Position = (NumberCarousel.Position == 0 ? TotalPokemon - 1 : NumberCarousel.Position--);
             ClearAnswerField();
-            if (NumberCarousel.Position == 9)
-            {
-                ShowPokemonAtIndex(0);
-            }
-            else
-            {
-                ShowPokemonAtIndex(NumberCarousel.Position - 1);
-            }
+            ShowPokemonAtIndex(NumberCarousel.Position);
         }
 
         //Carousel Posistion Changed
@@ -71,7 +61,7 @@ namespace FlashCard
             var currentPokemon = Pokedex.pokedex.ElementAt(currentIndex);
 
             //If revealed, show name & disable button
-            if (revealedPokemons.ContainsKey(currentPokemon.Key) == true)
+            if (revealedPokemons.ContainsKey(currentPokemon.Key))
             {
                 string current = currentPokemon.Value.ImageFile.Replace(".png", "");
                 string output = char.ToUpper(current[0]) + current.Substring(1);
