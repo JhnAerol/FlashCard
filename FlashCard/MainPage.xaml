@@ -54,6 +54,7 @@
                     <CarouselView x:Name="NumberCarousel"
                                   HeightRequest="450"
                                   IndicatorView="indicator"
+                                  PositionChanged="OnCarouselPositionChanged"
                                   HorizontalOptions="Fill">
                         <CarouselView.ItemTemplate>
                             <DataTemplate>
@@ -149,6 +150,7 @@
 
                         <Button Text="SUBMIT ANSWER"
                                 Clicked="OnEnterClicked"
+                                x:Name="btnSubmit"
                                 FontSize="18"
                                 FontAttributes="Bold"
                                 TextColor="White"

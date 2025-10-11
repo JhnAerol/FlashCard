@@ -1,10 +1,15 @@
-﻿namespace FlashCard
+﻿using System.Collections.Frozen;
+using static Android.Renderscripts.ScriptGroup;
+
+namespace FlashCard
 {
     public partial class MainPage : ContentPage
     {
         //Initializations
         Random _random = new Random();
         int TotalPokemon = 10;
+        bool allRevealed;
+        Dictionary<string, string> revealedPokemons = new Dictionary<string, string>();
 
         public MainPage()
         {
@@ -26,13 +31,16 @@
             int randomIndex = _random.Next(0, TotalPokemon);
             NumberCarousel.Position = randomIndex;
             ClearAnswerField();
+            //RevealedPokemon();
         }
 
         //Navigate Next Item
         private void OnNextClicked(object sender, EventArgs e)
         {
+
             NumberCarousel.Position = (NumberCarousel.Position == TotalPokemon - 1 ? 0 : NumberCarousel.Position++);
-            ClearAnswerField();
+            ClearAnswerField(); 
+            ShowPokemonAtIndex(NumberCarousel.Position + 1);
         }
 
         //Navigate Prev Item
@@ -40,8 +48,73 @@
         {
             NumberCarousel.Position = (NumberCarousel.Position == 0 ? TotalPokemon - 1 : NumberCarousel.Position--);
             ClearAnswerField();
+            if (NumberCarousel.Position == 9)
+            {
+                ShowPokemonAtIndex(0);
+            }
+            else
+            {
+                ShowPokemonAtIndex(NumberCarousel.Position - 1);
+            }
         }
 
+        //Carousel Posistion Changed
+        private void OnCarouselPositionChanged(object sender, PositionChangedEventArgs e)
+        {
+            ShowPokemonAtIndex(NumberCarousel.Position);
+        }
+
+        //Check the carousel index then if the image is revealed change the UI State
+        public void ShowPokemonAtIndex(int index)
+        {
+            int currentIndex = index;
+            var currentPokemon = Pokedex.pokedex.ElementAt(currentIndex);
+
+            //If revealed, show name & disable button
+            if (revealedPokemons.ContainsKey(currentPokemon.Key) == true)
+            {
+                string current = currentPokemon.Value.ImageFile.Replace(".png", "");
+                string output = char.ToUpper(current[0]) + current.Substring(1);
+                txtAnswer.Text = output;
+                txtAnswer.IsReadOnly = true;
+                btnSubmit.IsEnabled = false;
+                btnSubmit.BackgroundColor = Colors.Gray;
+            }
+            else
+            {
+                txtAnswer.Text = string.Empty;
+                txtAnswer.IsReadOnly = false;
+                btnSubmit.IsEnabled = true;
+                btnSubmit.BackgroundColor = Color.FromArgb("#4CAF50");
+            }
+        }
+
+        //If the image is revealed, show name & disable button
+        private void UpdateUIState()
+        {
+            if (NumberCarousel.CurrentItem is KeyValuePair<string, ImageClass> currentPokemon)
+            {
+                string imageFile = currentPokemon.Value.ImageFile;
+                bool isRevealed = !imageFile.Contains("_black");
+
+                if (isRevealed)
+                {
+                    txtAnswer.Text = currentPokemon.Key;
+                    txtAnswer.IsReadOnly = true;
+
+                    btnSubmit.IsEnabled = false;
+                    btnSubmit.BackgroundColor = Colors.Gray;
+                }
+                else
+                {
+                    txtAnswer.Text = string.Empty;
+                    txtAnswer.IsReadOnly = false;
+
+                    btnSubmit.IsEnabled = true;
+                    btnSubmit.BackgroundColor = Color.FromArgb("#4CAF50");
+                }
+            }
+        }
 
         //Sumbit Answer
         private async void OnEnterClicked(object sender, EventArgs e)
@@ -64,6 +137,7 @@
                 if (isCorrect)
                 {
                     await ShowCorrectAnswer(currentPokemon.Key);
+                    revealedPokemons.Add(currentPokemon.Key, currentPokemon.Value.ImageFile);
                 }
                 else
                 {
@@ -93,11 +167,17 @@
                 }
             }
 
+            txtAnswer.Text = pokemonName;
+            txtAnswer.IsReadOnly = true;
+
+            btnSubmit.IsEnabled = false;
+            btnSubmit.BackgroundColor = Colors.Gray;
+
             //Count 1.2s
             Thread.Sleep(1200);
 
             //Check if all the images are revealed
-            bool allRevealed = Pokedex.pokedex.Values.All(p => p.ImageFile != null && !p.ImageFile.Contains("_black"));
+            allRevealed = Pokedex.pokedex.Values.All(p => p.ImageFile != null && !p.ImageFile.Contains("_black"));
             if (allRevealed)
             {
                 //Display alert when all the images are revealed
@@ -126,8 +206,9 @@
                     NumberCarousel.Position++;
                 }
             }
-
+            
             ClearAnswerField();
+            UpdateUIState();
         }
 
         //Method to call if the answer is Incorrect
