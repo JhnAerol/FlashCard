@@ -13,36 +13,7 @@
         <!--Main Content-->
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="20">
-
-                <!--Title Section-->
-                <Border StrokeThickness="4"
-                        Padding="15,10"
-                        Margin="0,10,0,0"
-                        HorizontalOptions="Center"
-                        BackgroundColor="#FFCB05">
-                    <Border.Stroke>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#3B4CCA" Offset="0.0" />
-                            <GradientStop Color="#B3A125" Offset="1.0" />
-                        </LinearGradientBrush>
-                    </Border.Stroke>
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="15" />
-                    </Border.StrokeShape>
-                    <Label Text=" POKÉMON QUIZ "
-                           FontSize="32"
-                           FontAttributes="Bold"
-                           TextColor="#3B4CCA"
-                           HorizontalOptions="Center">
-                        <Label.Shadow>
-                            <Shadow Brush="White"
-                                    Offset="2,2"
-                                    Radius="1"
-                                    Opacity="0.8" />
-                        </Label.Shadow>
-                    </Label>
-                </Border>
-
+                
                 <!--CarouselView-->
                 <Border StrokeThickness="0"
                         Padding="5"
@@ -89,13 +60,14 @@
                                             <Border.StrokeShape>
                                                 <RoundRectangle CornerRadius="12" />
                                             </Border.StrokeShape>
-                                            <Label Text="WHO'S THAT   POKÉMON?"
+                                            <Label Text="WHO'S THAT POKÉMON?"
                                                    FontSize="20"
                                                    FontAttributes="Bold"
                                                    TextColor="White"
-                                                   Padding="35,0"
-                                                   VerticalOptions="Center"
-                                                   HorizontalOptions="Center" />
+                                                   HorizontalTextAlignment="Center"
+                                                   HorizontalOptions="Center"
+                                                   VerticalOptions="Center" />
+                                            
                                         </Border>
 
                                         <!--Pokemon Image-->
@@ -113,7 +85,14 @@
                                                    HeightRequest="200"
                                                    Aspect="AspectFit"
                                                    HorizontalOptions="Center"
-                                                   VerticalOptions="Center" />
+                                                   VerticalOptions="Center">
+                                                <Image.Shadow>
+                                                    <Shadow Brush="Gray"
+                                                            Offset="0,6"
+                                                            Radius="5"
+                                                            Opacity="0.5" />
+                                                </Image.Shadow>
+                                            </Image>
                                         </Border>
                                     </Grid>
                                 </Border>
@@ -145,7 +124,7 @@
                                Placeholder="Enter Pokémon name..."
                                PlaceholderColor="#999999"
                                TextColor="#333333"
-                               BackgroundColor="#F8F8F8"
+                               BackgroundColor="White"
                                HeightRequest="50" />
 
                         <Button Text="SUBMIT ANSWER"
@@ -155,6 +134,8 @@
                                 FontAttributes="Bold"
                                 TextColor="White"
                                 BackgroundColor="#4CAF50"
+                                BorderColor="Black"
+                                BorderWidth="2"
                                 CornerRadius="12"
                                 HeightRequest="50"
                                 Padding="20,10">
@@ -173,7 +154,9 @@
                             FontSize="16"
                             FontAttributes="Bold"
                             TextColor="White"
-                            BackgroundColor="#3B4CCA"
+                            BackgroundColor="#3EC000"
+                            BorderColor="White"
+                            BorderWidth="2"                            
                             CornerRadius="12"
                             HeightRequest="50">
                         <Button.Shadow>
@@ -191,6 +174,8 @@
                             FontAttributes="Bold"
                             TextColor="White"
                             BackgroundColor="#FF6B35"
+                            BorderColor="White"
+                            BorderWidth="2"
                             CornerRadius="12"
                             HeightRequest="50">
                         <Button.Shadow>
@@ -207,7 +192,9 @@
                             FontSize="16"
                             FontAttributes="Bold"
                             TextColor="White"
-                            BackgroundColor="#3B4CCA"
+                            BackgroundColor="#3EC000"
+                            BorderColor="White"
+                            BorderWidth="2"
                             CornerRadius="12"
                             HeightRequest="50">
                         <Button.Shadow>
@@ -223,7 +210,9 @@
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="White"
-                        BackgroundColor="#3B4CCA"
+                        BackgroundColor="Black"
+                        BorderColor="Red"
+                        BorderWidth="2"
                         CornerRadius="12"
                         HeightRequest="50">
                     <Button.Shadow>

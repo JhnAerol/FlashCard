@@ -8,12 +8,17 @@ namespace FlashCard
         Random _random = new Random();
         int TotalPokemon = 10;
         bool allRevealed = false;
+        bool someRevealed = false;
+        string[] values;
         Dictionary<string, string> revealedPokemons = new Dictionary<string, string>();
+        Dictionary<string, string> notRevealedPokemon = new Dictionary<string, string>();
 
         public MainPage()
         {
             InitializeComponent();
             InitializePokedex();
+            NotRevealedPokmon();
+            values = notRevealedPokemon.Values.ToArray();
         }
 
         //To Display Pokedex
@@ -27,9 +32,15 @@ namespace FlashCard
         private void OnShuffleClicked(object sender, EventArgs e)
         {
             int randomIndex = _random.Next(0, TotalPokemon);
-            NumberCarousel.Position = randomIndex;
-            ClearAnswerField();
-            //RevealedPokemon();
+            if (someRevealed == true)
+            {
+                NumberCarousel.Position = GetIndexofNotRevealedPokemon();
+            }
+            else if(allRevealed == true)
+            {
+                NumberCarousel.Position = randomIndex;
+            }
+            ShowPokemonAtIndex(NumberCarousel.Position);
         }
 
         //Navigate Next Item
@@ -57,12 +68,41 @@ namespace FlashCard
             {
                 Reset();
             }
+            else
+            {
+                allRevealed = true;
+                someRevealed = false;
+            }
         }
 
         //Carousel Posistion Changed
         private void OnCarouselPositionChanged(object sender, PositionChangedEventArgs e)
         {
             ShowPokemonAtIndex(NumberCarousel.Position);
+        }
+
+        private int GetIndexofNotRevealedPokemon()
+        {
+            var values = notRevealedPokemon.Values.ToList();
+            Random rand = new Random();
+
+            //Collect indexes that match "_black"
+            var blackIndexes = Enumerable.Range(0, values.Count)
+                                         .Where(i => values[i].Contains("_black"))
+                                         .ToList();
+
+            // Randomly pick one of those indexes
+            int chosenIndex = blackIndexes[rand.Next(blackIndexes.Count)];
+
+            return chosenIndex;
+        }
+
+        public void NotRevealedPokmon()
+        {
+            foreach(var notReveal in Pokedex.pokedex)
+            {
+                notRevealedPokemon.Add(notReveal.Key, notReveal.Value.ImageFile);
+            }
         }
 
         //Reset the program
@@ -76,12 +116,21 @@ namespace FlashCard
                 }
             }
 
+            revealedPokemons.Clear();
+            notRevealedPokemon.Clear();
+            Array.Clear(values);
+
+            allRevealed = false;
+            someRevealed = true;
+            NotRevealedPokmon();
+            values = notRevealedPokemon.Values.ToArray();
+
             txtAnswer.Text = string.Empty;
             txtAnswer.IsReadOnly = false;
             btnSubmit.IsEnabled = true;
             btnSubmit.BackgroundColor = Color.FromArgb("#4CAF50");
 
-            revealedPokemons.Clear();
+            NumberCarousel.Position = 0;        
         }
 
         //Check the carousel index then if the image is revealed change the UI State
@@ -121,7 +170,6 @@ namespace FlashCard
                 {
                     txtAnswer.Text = currentPokemon.Key;
                     txtAnswer.IsReadOnly = true;
-
                     btnSubmit.IsEnabled = false;
                     btnSubmit.BackgroundColor = Colors.Gray;
                 }
@@ -129,7 +177,6 @@ namespace FlashCard
                 {
                     txtAnswer.Text = string.Empty;
                     txtAnswer.IsReadOnly = false;
-
                     btnSubmit.IsEnabled = true;
                     btnSubmit.BackgroundColor = Color.FromArgb("#4CAF50");
                 }
@@ -156,14 +203,30 @@ namespace FlashCard
                 //Then check if the Answer is Correct or Incorrect
                 if (isCorrect)
                 {
-                    if (revealedPokemons.ContainsKey(currentPokemon.Key))
+                    if (revealedPokemons.ContainsKey(currentPokemon.Key) && !notRevealedPokemon.ContainsKey(currentPokemon.Key))
                     {
-                        await DisplayAlert("Duplication", "Multiple value added.", "Okay");
+                        await DisplayAlert("Duplication", "Duplication Error.", "Okay");
                     }
                     else
                     {
+                        if(values != null)
+                        {
+                            Array.Clear(values);
+                        }
                         revealedPokemons.Add(currentPokemon.Key, currentPokemon.Value.ImageFile);
+                        if (notRevealedPokemon.ContainsKey(currentPokemon.Key))
+                        {
+                            foreach(var np in notRevealedPokemon.Values)
+                            {
+                                if (np == currentPokemon.Value.ImageFile)
+                                {
+                                    notRevealedPokemon[currentPokemon.Key] = np.Replace("_black.png", ".png");
+                                }
+                            }
+                        }
+                        values = notRevealedPokemon.Values.ToArray();
                     }
+                    someRevealed = true;
                     await ShowCorrectAnswer(currentPokemon.Key);
                 }
                 else
@@ -211,6 +274,11 @@ namespace FlashCard
                 {
                     Reset();
                 }
+                else
+                {
+                    allRevealed= true;
+                    someRevealed = false;
+                }
             }
             else if (NumberCarousel.Position == TotalPokemon - 1)
             {
@@ -229,16 +297,16 @@ namespace FlashCard
                 if(NumberCarousel.Position == TotalPokemon - 1 || allRevealed)
                 {
                     NumberCarousel.Position = 0;
-                    allRevealed = false;
                 }
                 else
                 {
                     NumberCarousel.Position++;
                 }
+                ShowPokemonAtIndex(NumberCarousel.Position);
             }
-            
+
             ClearAnswerField();
-            UpdateUIState(); 
+            UpdateUIState();
         }
 
         //Method to call if the answer is Incorrect
