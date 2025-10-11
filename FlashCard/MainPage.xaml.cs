@@ -7,7 +7,7 @@ namespace FlashCard
         //Initializations
         Random _random = new Random();
         int TotalPokemon = 10;
-        bool allRevealed;
+        bool allRevealed = false;
         Dictionary<string, string> revealedPokemons = new Dictionary<string, string>();
 
         public MainPage()
@@ -47,11 +47,41 @@ namespace FlashCard
             ClearAnswerField();
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
+        
+        //Reset 
+        private async void OnResetClicked(object sender, EventArgs e)
+        {
+            bool answer = await DisplayAlert("Reset?", "Do you want to reset? ", "Yes", "No");
+
+            if (answer)
+            {
+                Reset();
+            }
+        }
 
         //Carousel Posistion Changed
         private void OnCarouselPositionChanged(object sender, PositionChangedEventArgs e)
         {
             ShowPokemonAtIndex(NumberCarousel.Position);
+        }
+
+        //Reset the program
+        public void Reset()
+        {
+            foreach (var pokemon in Pokedex.pokedex.Values)
+            {
+                if (!pokemon.ImageFile.Contains("_black"))
+                {
+                   pokemon.ImageFile = pokemon.ImageFile.Replace(".png", "_black.png");
+                }
+            }
+
+            txtAnswer.Text = string.Empty;
+            txtAnswer.IsReadOnly = false;
+            btnSubmit.IsEnabled = true;
+            btnSubmit.BackgroundColor = Color.FromArgb("#4CAF50");
+
+            revealedPokemons.Clear();
         }
 
         //Check the carousel index then if the image is revealed change the UI State
@@ -126,8 +156,15 @@ namespace FlashCard
                 //Then check if the Answer is Correct or Incorrect
                 if (isCorrect)
                 {
+                    if (revealedPokemons.ContainsKey(currentPokemon.Key))
+                    {
+                        await DisplayAlert("Duplication", "Multiple value added.", "Okay");
+                    }
+                    else
+                    {
+                        revealedPokemons.Add(currentPokemon.Key, currentPokemon.Value.ImageFile);
+                    }
                     await ShowCorrectAnswer(currentPokemon.Key);
-                    revealedPokemons.Add(currentPokemon.Key, currentPokemon.Value.ImageFile);
                 }
                 else
                 {
@@ -157,21 +194,23 @@ namespace FlashCard
                 }
             }
 
-            txtAnswer.Text = pokemonName;
-            txtAnswer.IsReadOnly = true;
-
-            btnSubmit.IsEnabled = false;
-            btnSubmit.BackgroundColor = Colors.Gray;
-
             //Count 1.2s
-            Thread.Sleep(1200);
+            Thread.Sleep(1200); 
 
             //Check if all the images are revealed
             allRevealed = Pokedex.pokedex.Values.All(p => p.ImageFile != null && !p.ImageFile.Contains("_black"));
             if (allRevealed)
             {
-                //Display alert when all the images are revealed
+                //Display alert when all the images are revealed 
                 await DisplayAlert("Congratulations!", "All Pokémon have been revealed!", "Okay");
+
+                //Reset
+                bool answer = await DisplayAlert("Reset?", "Do you want to reset? ", "Yes", "No");
+
+                if (answer)
+                {
+                    Reset();
+                }
             }
             else if (NumberCarousel.Position == TotalPokemon - 1)
             {
@@ -190,6 +229,7 @@ namespace FlashCard
                 if(NumberCarousel.Position == TotalPokemon - 1 || allRevealed)
                 {
                     NumberCarousel.Position = 0;
+                    allRevealed = false;
                 }
                 else
                 {
@@ -198,7 +238,7 @@ namespace FlashCard
             }
             
             ClearAnswerField();
-            UpdateUIState();
+            UpdateUIState(); 
         }
 
         //Method to call if the answer is Incorrect
