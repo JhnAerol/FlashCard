@@ -8,7 +8,7 @@ namespace FlashCard
         Random _random = new Random();
         int TotalPokemon = 10;
         bool allRevealed = false;
-        bool someRevealed = false;
+        bool someRevealed = true;
         string[] values;
         Dictionary<string, string> revealedPokemons = new Dictionary<string, string>();
         Dictionary<string, string> notRevealedPokemon = new Dictionary<string, string>();
@@ -168,17 +168,18 @@ namespace FlashCard
             }
         }
 
-        //If the image is revealed, show name & disable button
+        //If the image is revealed, update the UI state
         private void UpdateUIState()
         {
             if (NumberCarousel.CurrentItem is KeyValuePair<string, ImageClass> currentPokemon)
             {
                 string imageFile = currentPokemon.Value.ImageFile;
                 bool isRevealed = !imageFile.Contains("_black");
+                string output = char.ToUpper(imageFile[0]) + imageFile.Substring(1);
 
                 if (isRevealed)
                 {
-                    txtAnswer.Text = currentPokemon.Key;
+                    txtAnswer.Text = output.Replace(".png", "");
                     txtAnswer.IsReadOnly = true;
                     btnSubmit.IsEnabled = false;
                     btnSubmit.BackgroundColor = Colors.Gray;
@@ -233,7 +234,6 @@ namespace FlashCard
                         }
                         values = notRevealedPokemon.Values.ToArray();
                     }
-                    someRevealed = true;
                     await ShowCorrectAnswer(currentPokemon.Key);
                 }
                 else
