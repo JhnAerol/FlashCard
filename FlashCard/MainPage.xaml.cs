@@ -211,26 +211,19 @@ namespace FlashCard
                 //Then check if the Answer is Correct or Incorrect
                 if (isCorrect)
                 {
-                    //Prevent Duplication
-                    if (revealedPokemons.ContainsKey(currentPokemon.Key) && !notRevealedPokemon.ContainsKey(currentPokemon.Key))
-                    {
-                        //Already revealed - do nothing
-                    }
                     //To prevent shuffling the revealed pokemon
-                    else
+                    if (values != null)
                     {
-                        if (values != null)
-                        {
-                            Array.Clear(values);
-                        }
-                        revealedPokemons.Add(currentPokemon.Key, currentPokemon.Value.ImageFile);
-                        if (notRevealedPokemon.ContainsKey(currentPokemon.Key))
-                        {
-                            string currentImage = notRevealedPokemon[currentPokemon.Key];
-                            notRevealedPokemon[currentPokemon.Key] = currentImage.Replace("_black.png", ".png");
-                        }
-                        values = notRevealedPokemon.Values.ToArray();
+                        Array.Clear(values);
                     }
+                    revealedPokemons.Add(currentPokemon.Key, currentPokemon.Value.ImageFile);
+                    if (notRevealedPokemon.ContainsKey(currentPokemon.Key))
+                    {
+                        string currentImage = notRevealedPokemon[currentPokemon.Key];
+                        notRevealedPokemon[currentPokemon.Key] = currentImage.Replace("_black.png", ".png");
+                    }
+                    values = notRevealedPokemon.Values.ToArray();
+                   
                     await ShowCorrectAnswer(currentPokemon.Key);
                 }
                 else
