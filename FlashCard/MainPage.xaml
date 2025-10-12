@@ -13,7 +13,7 @@
         <!--Main Content-->
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="20">
-                
+
                 <!--CarouselView-->
                 <Border StrokeThickness="0"
                         Padding="5"
@@ -67,7 +67,7 @@
                                                    HorizontalTextAlignment="Center"
                                                    HorizontalOptions="Center"
                                                    VerticalOptions="Center" />
-                                            
+
                                         </Border>
 
                                         <!--Pokemon Image-->
@@ -154,10 +154,10 @@
                             FontSize="16"
                             FontAttributes="Bold"
                             TextColor="White"
-                            BackgroundColor="#3EC000"
+                            BackgroundColor="#007BFF"
                             BorderColor="White"
                             BorderWidth="2"                            
-                            CornerRadius="12"
+                            CornerRadius="15"
                             HeightRequest="50">
                         <Button.Shadow>
                             <Shadow Brush="Black"
@@ -173,10 +173,10 @@
                             FontSize="16"
                             FontAttributes="Bold"
                             TextColor="White"
-                            BackgroundColor="#FF6B35"
+                            BackgroundColor="#FFD500"
                             BorderColor="White"
                             BorderWidth="2"
-                            CornerRadius="12"
+                            CornerRadius="15"
                             HeightRequest="50">
                         <Button.Shadow>
                             <Shadow Brush="Black"
@@ -192,10 +192,10 @@
                             FontSize="16"
                             FontAttributes="Bold"
                             TextColor="White"
-                            BackgroundColor="#3EC000"
+                            BackgroundColor="#28A745"
                             BorderColor="White"
                             BorderWidth="2"
-                            CornerRadius="12"
+                            CornerRadius="15"
                             HeightRequest="50">
                         <Button.Shadow>
                             <Shadow Brush="Black"
@@ -210,10 +210,10 @@
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="White"
-                        BackgroundColor="Black"
-                        BorderColor="Red"
+                        BackgroundColor="#D32F2F"
+                        BorderColor="White" 
                         BorderWidth="2"
-                        CornerRadius="12"
+                        CornerRadius="15"
                         HeightRequest="50">
                     <Button.Shadow>
                         <Shadow Brush="Black"
@@ -225,6 +225,4 @@
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
-
-
 </ContentPage>

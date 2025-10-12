@@ -38,7 +38,7 @@ namespace FlashCard
             }
             else if(allRevealed == true)
             {
-                NumberCarousel.Position = randomIndex;
+               NumberCarousel.Position = randomIndex;
             }
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
@@ -46,7 +46,7 @@ namespace FlashCard
         //Navigate Next Item
         private void OnNextClicked(object sender, EventArgs e)
         {
-            NumberCarousel.Position = (NumberCarousel.Position == TotalPokemon - 1 ? 0 : NumberCarousel.Position++);
+            NumberCarousel.Position = (NumberCarousel.Position == TotalPokemon - 1 ? 0 : NumberCarousel.Position + 1);
             ClearAnswerField();
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
@@ -54,7 +54,7 @@ namespace FlashCard
         //Navigate Prev Item
         private void OnPrevClicked(object sender, EventArgs e)
         {
-            NumberCarousel.Position = (NumberCarousel.Position == 0 ? TotalPokemon - 1 : NumberCarousel.Position--);
+            NumberCarousel.Position = (NumberCarousel.Position == 0 ? TotalPokemon - 1 : NumberCarousel.Position - 1);
             ClearAnswerField();
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
@@ -81,22 +81,26 @@ namespace FlashCard
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
 
+        //Get the indexes of not revealed pokemos 
         private int GetIndexofNotRevealedPokemon()
         {
             var values = notRevealedPokemon.Values.ToList();
-            Random rand = new Random();
 
             //Collect indexes that match "_black"
             var blackIndexes = Enumerable.Range(0, values.Count)
                                          .Where(i => values[i].Contains("_black"))
                                          .ToList();
 
-            // Randomly pick one of those indexes
-            int chosenIndex = blackIndexes[rand.Next(blackIndexes.Count)];
+            if (blackIndexes.Count == 0)
+                return 0;
+
+            //Randomly pick one of those indexes
+            int chosenIndex = blackIndexes[_random.Next(blackIndexes.Count)];
 
             return chosenIndex;
         }
 
+        //Initialize the not revealed pokemon
         public void NotRevealedPokmon()
         {
             foreach(var notReveal in Pokedex.pokedex)
@@ -118,7 +122,10 @@ namespace FlashCard
 
             revealedPokemons.Clear();
             notRevealedPokemon.Clear();
-            Array.Clear(values);
+            if (values != null)
+            {
+                Array.Clear(values);
+            }
 
             allRevealed = false;
             someRevealed = true;
@@ -138,6 +145,9 @@ namespace FlashCard
         {
             int currentIndex = index;
             var currentPokemon = Pokedex.pokedex.ElementAt(currentIndex);
+
+            if (currentIndex < 0 || currentIndex >= Pokedex.pokedex.Count)
+                return;
 
             //If revealed, show name & disable button
             if (revealedPokemons.ContainsKey(currentPokemon.Key))
@@ -203,10 +213,12 @@ namespace FlashCard
                 //Then check if the Answer is Correct or Incorrect
                 if (isCorrect)
                 {
+                    //Prevent Duplication
                     if (revealedPokemons.ContainsKey(currentPokemon.Key) && !notRevealedPokemon.ContainsKey(currentPokemon.Key))
                     {
                         await DisplayAlert("Duplication", "Duplication Error.", "Okay");
                     }
+                    //To prevent shuffling the revealed pokemon
                     else
                     {
                         if(values != null)
@@ -216,13 +228,8 @@ namespace FlashCard
                         revealedPokemons.Add(currentPokemon.Key, currentPokemon.Value.ImageFile);
                         if (notRevealedPokemon.ContainsKey(currentPokemon.Key))
                         {
-                            foreach(var np in notRevealedPokemon.Values)
-                            {
-                                if (np == currentPokemon.Value.ImageFile)
-                                {
-                                    notRevealedPokemon[currentPokemon.Key] = np.Replace("_black.png", ".png");
-                                }
-                            }
+                            string currentImage = notRevealedPokemon[currentPokemon.Key];
+                            notRevealedPokemon[currentPokemon.Key] = currentImage.Replace("_black.png", ".png");
                         }
                         values = notRevealedPokemon.Values.ToArray();
                     }
@@ -258,10 +265,11 @@ namespace FlashCard
             }
 
             //Count 1.2s
-            Thread.Sleep(1200); 
+            await Task.Delay(1200); 
 
             //Check if all the images are revealed
             allRevealed = Pokedex.pokedex.Values.All(p => p.ImageFile != null && !p.ImageFile.Contains("_black"));
+
             if (allRevealed)
             {
                 //Display alert when all the images are revealed 
@@ -269,7 +277,6 @@ namespace FlashCard
 
                 //Reset
                 bool answer = await DisplayAlert("Reset?", "Do you want to reset? ", "Yes", "No");
-
                 if (answer)
                 {
                     Reset();
