@@ -36,9 +36,9 @@ namespace FlashCard
             {
                 NumberCarousel.Position = GetIndexofNotRevealedPokemon();
             }
-            else if(allRevealed == true)
+            else if (allRevealed == true)
             {
-               NumberCarousel.Position = randomIndex;
+                NumberCarousel.Position = randomIndex;
             }
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
@@ -48,6 +48,7 @@ namespace FlashCard
         {
             NumberCarousel.Position = (NumberCarousel.Position == TotalPokemon - 1 ? 0 : NumberCarousel.Position + 1);
             ClearAnswerField();
+            HideFeedback();
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
 
@@ -56,28 +57,21 @@ namespace FlashCard
         {
             NumberCarousel.Position = (NumberCarousel.Position == 0 ? TotalPokemon - 1 : NumberCarousel.Position - 1);
             ClearAnswerField();
+            HideFeedback();
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
-        
+
         //Reset 
         private async void OnResetClicked(object sender, EventArgs e)
         {
-            bool answer = await DisplayAlert("Reset?", "Do you want to reset? ", "Yes", "No");
-
-            if (answer)
-            {
-                Reset();
-            }
-            else
-            {
-                allRevealed = true;
-                someRevealed = false;
-            }
+            //Show custom reset confirmation
+            await ShowResetConfirmation();
         }
 
         //Carousel Posistion Changed
         private void OnCarouselPositionChanged(object sender, PositionChangedEventArgs e)
         {
+            HideFeedback();
             ShowPokemonAtIndex(NumberCarousel.Position);
         }
 
@@ -103,7 +97,7 @@ namespace FlashCard
         //Initialize the not revealed pokemon
         public void NotRevealedPokmon()
         {
-            foreach(var notReveal in Pokedex.pokedex)
+            foreach (var notReveal in Pokedex.pokedex)
             {
                 notRevealedPokemon.Add(notReveal.Key, notReveal.Value.ImageFile);
             }
@@ -116,7 +110,7 @@ namespace FlashCard
             {
                 if (!pokemon.ImageFile.Contains("_black"))
                 {
-                   pokemon.ImageFile = pokemon.ImageFile.Replace(".png", "_black.png");
+                    pokemon.ImageFile = pokemon.ImageFile.Replace(".png", "_black.png");
                 }
             }
 
@@ -137,7 +131,10 @@ namespace FlashCard
             btnSubmit.IsEnabled = true;
             btnSubmit.BackgroundColor = Color.FromArgb("#4CAF50");
 
-            NumberCarousel.Position = 0;        
+            NumberCarousel.Position = 0;
+            HideFeedback();
+            HideResetConfirmation();
+            UpdateProgressBar();
         }
 
         //Check the carousel index then if the image is revealed change the UI State
@@ -194,13 +191,13 @@ namespace FlashCard
             }
         }
 
-        //Sumbit Answer
+        //Submit Answer
         private async void OnEnterClicked(object sender, EventArgs e)
         {
             //Prevent Null Answer
             if (string.IsNullOrWhiteSpace(txtAnswer.Text))
             {
-                await DisplayAlert("Empty Answer", "Please enter a Pokémon name!", "OK");
+                await ShowEmptyAnswerFeedback();
                 return;
             }
 
@@ -217,12 +214,12 @@ namespace FlashCard
                     //Prevent Duplication
                     if (revealedPokemons.ContainsKey(currentPokemon.Key) && !notRevealedPokemon.ContainsKey(currentPokemon.Key))
                     {
-                        await DisplayAlert("Duplication", "Duplication Error.", "Okay");
+                        //Already revealed - do nothing
                     }
                     //To prevent shuffling the revealed pokemon
                     else
                     {
-                        if(values != null)
+                        if (values != null)
                         {
                             Array.Clear(values);
                         }
@@ -264,64 +261,47 @@ namespace FlashCard
                 }
             }
 
-            //Count 1.2s
-            await Task.Delay(1200); 
+            //Show success feedback
+            await ShowSuccessFeedback(pokemonName);
+            UpdateProgressBar();
 
             //Check if all the images are revealed
             allRevealed = Pokedex.pokedex.Values.All(p => p.ImageFile != null && !p.ImageFile.Contains("_black"));
 
+            await Task.Delay(1500);
+
             if (allRevealed)
             {
-                //Display alert when all the images are revealed 
-                await DisplayAlert("Congratulations!", "All Pokémon have been revealed!", "Okay");
-
-                //Reset
-                bool answer = await DisplayAlert("Reset?", "Do you want to reset? ", "Yes", "No");
-                if (answer)
-                {
-                    Reset();
-                }
-                else
-                {
-                    allRevealed= true;
-                    someRevealed = false;
-                }
-            }
-            else if (NumberCarousel.Position == TotalPokemon - 1)
-            {
-                //Display alert when answer is corrent and it is the last number
-                await DisplayAlert("Correct!", $"That's right! It's {pokemonName}! ", "Okay");
+                await ShowCompletionCelebration();
             }
             else
             {
-                //Display alert when answer is corrent
-                await DisplayAlert("Correct!", $"That's right! It's {pokemonName}! ", "Next Pokémon");
-            }
-
-            //Go to perspective pokemon
-            if (NumberCarousel.Position <= TotalPokemon - 1)
-            {
-                if(NumberCarousel.Position == TotalPokemon - 1 || allRevealed)
+                //Go to next pokemon
+                if (NumberCarousel.Position <= TotalPokemon - 1)
                 {
-                    NumberCarousel.Position = 0;
+                    if (NumberCarousel.Position == TotalPokemon - 1)
+                    {
+                        NumberCarousel.Position = 0;
+                    }
+                    else
+                    {
+                        NumberCarousel.Position++;
+                    }
+                    ShowPokemonAtIndex(NumberCarousel.Position);
                 }
-                else
-                {
-                    NumberCarousel.Position++;
-                }
-                ShowPokemonAtIndex(NumberCarousel.Position);
             }
 
             ClearAnswerField();
             UpdateUIState();
+            HideFeedback();
         }
 
         //Method to call if the answer is Incorrect
         private async Task ShowIncorrectAnswer(string correctAnswer)
         {
-            //Display alert when answer is Incorrect
-            await DisplayAlert("Incorrect", $"Sorry! Wrong amswer :(. Try again!", "Try Again");
-
+            await ShowErrorFeedback();
+            await Task.Delay(2000);
+            HideFeedback();
             ClearAnswerField();
             txtAnswer.Focus();
         }
@@ -330,6 +310,128 @@ namespace FlashCard
         private void ClearAnswerField()
         {
             txtAnswer.Text = string.Empty;
+        }
+
+        //Show empty answer feedback
+        private async Task ShowEmptyAnswerFeedback()
+        {
+            feedbackBorder.BackgroundColor = Color.FromArgb("#FFA726");
+            feedbackMessage.Text = "Please enter a Pokémon name!";
+            feedbackBorder.IsVisible = true;
+
+            await feedbackBorder.ScaleTo(1.1, 100);
+            await feedbackBorder.ScaleTo(1, 100);
+
+            await Task.Delay(2000);
+            HideFeedback();
+        }
+
+        //Show success feedback
+        private async Task ShowSuccessFeedback(string pokemonName)
+        {
+            feedbackBorder.BackgroundColor = Color.FromArgb("#4CAF50");
+            feedbackMessage.Text = $"Correct! It's {char.ToUpper(pokemonName[0]) + pokemonName.Substring(1)}!";
+            feedbackBorder.IsVisible = true;
+
+            await feedbackBorder.ScaleTo(1.15, 150);
+            await feedbackBorder.ScaleTo(1, 150);
+        }
+
+        //Show error feedback
+        private async Task ShowErrorFeedback()
+        {
+            feedbackBorder.BackgroundColor = Color.FromArgb("#F44336");
+            feedbackMessage.Text = "Wrong answer! Try again!";
+            feedbackBorder.IsVisible = true;
+
+            await feedbackBorder.TranslateTo(-10, 0, 50);
+            await feedbackBorder.TranslateTo(10, 0, 50);
+            await feedbackBorder.TranslateTo(-10, 0, 50);
+            await feedbackBorder.TranslateTo(0, 0, 50);
+        }
+
+        //Hide feedback
+        private void HideFeedback()
+        {
+            feedbackBorder.IsVisible = false;
+        }
+
+        //Show completion celebration
+        private async Task ShowCompletionCelebration()
+        {
+            completionOverlay.IsVisible = true;
+            completionContent.Opacity = 0;
+            completionContent.Scale = 0.5;
+
+            await Task.WhenAll(
+                completionContent.FadeTo(1, 300),
+                completionContent.ScaleTo(1, 300, Easing.BounceOut)
+            );
+        }
+
+        //Hide completion celebration
+        private void HideCompletionCelebration()
+        {
+            completionOverlay.IsVisible = false;
+        }
+
+        //Show reset confirmation
+        private async Task ShowResetConfirmation()
+        {
+            resetOverlay.IsVisible = true;
+            resetContent.Opacity = 0;
+            resetContent.Scale = 0.8;
+
+            await Task.WhenAll(
+                resetContent.FadeTo(1, 200),
+                resetContent.ScaleTo(1, 200)
+            );
+        }
+
+        //Hide reset confirmation
+        private void HideResetConfirmation()
+        {
+            resetOverlay.IsVisible = false;
+        }
+
+        //Confirm reset
+        private async void OnConfirmResetClicked(object sender, EventArgs e)
+        {
+            await resetContent.ScaleTo(0.8, 100);
+            Reset();
+        }
+
+        //Cancel reset
+        private async void OnCancelResetClicked(object sender, EventArgs e)
+        {
+            await resetContent.ScaleTo(0.8, 100);
+            HideResetConfirmation();
+        }
+
+        //Continue after completion
+        private async void OnContinueClicked(object sender, EventArgs e)
+        {
+            await completionContent.ScaleTo(0.8, 100);
+            HideCompletionCelebration();
+            allRevealed = true;
+            someRevealed = false;
+        }
+
+        //Reset after completion
+        private async void OnResetAfterCompletionClicked(object sender, EventArgs e)
+        {
+            await completionContent.ScaleTo(0.8, 100);
+            HideCompletionCelebration();
+            Reset();
+        }
+
+        //Update progress bar
+        private void UpdateProgressBar()
+        {
+            int revealed = revealedPokemons.Count;
+            double progress = (double)revealed /TotalPokemon;
+            progressBar.Progress = progress;
+            progressLabel.Text = $"{revealed}/{TotalPokemon} Pokémon Revealed";
         }
     }
 }
