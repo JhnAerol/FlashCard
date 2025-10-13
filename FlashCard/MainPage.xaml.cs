@@ -1,6 +1,4 @@
-﻿using System.Collections.Frozen;
-
-namespace FlashCard
+﻿namespace FlashCard
 {
     public partial class MainPage : ContentPage
     {
